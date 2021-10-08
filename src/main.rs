@@ -1,18 +1,22 @@
 use anyhow::Error;
 use comfy_table::Table;
 use models::TypeStatistic;
+use options::Opt;
 use std::{
     collections::HashMap,
     fs::File,
     io::{self, BufRead},
 };
+use structopt::StructOpt;
 
 mod analyse;
 mod models;
+mod options;
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let file = File::open("input.log")?;
+    let options = Opt::from_args();
+    let file = File::open(options.input)?;
 
     print_statistics(analyse::messages(io::BufReader::new(file).lines()).await);
 

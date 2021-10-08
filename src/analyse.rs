@@ -44,6 +44,7 @@ mod tests {
             Ok(r#"{"type":"B","foo":"bar","items":["one","two"]}"#.to_string()),
             Ok(r#"{"type": "A","foo": 4.0 }"#.to_string()),
             Ok(r#"{"type": "B","bar": "abcd"}"#.to_string()),
-            ]).await;
+        ])
+        .await;
     }
 }
