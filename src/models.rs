@@ -1,6 +1,22 @@
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::{collections::HashMap, convert::TryFrom};
+
+type Type = String;
+
+pub struct Statistics {
+    pub types: HashMap<Type, TypeStatistic>,
+    pub errors: Vec<Error>,
+}
+
+impl Statistics {
+    pub fn new() -> Self {
+        Self {
+            types: HashMap::new(),
+            errors: vec![],
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct TypeStatistic {
@@ -19,15 +35,6 @@ impl TypeStatistic {
 pub struct Message {
     pub type_field: String,
     pub byte_size: u64,
-}
-
-impl Message {
-    pub fn error() -> Self {
-        Message {
-            type_field: "errors".to_string(),
-            byte_size: 0,
-        }
-    }
 }
 
 impl TryFrom<String> for Message {
