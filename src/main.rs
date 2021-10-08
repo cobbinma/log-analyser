@@ -1,4 +1,4 @@
-use anyhow::Error;
+use anyhow::{Context, Error};
 use comfy_table::Table;
 use models::TypeStatistic;
 use options::Opt;
@@ -16,7 +16,7 @@ mod options;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let options = Opt::from_args();
-    let file = File::open(options.input)?;
+    let file = File::open(options.input).context("unable to open input file")?;
 
     print_statistics(analyse::messages(io::BufReader::new(file).lines()).await);
 
