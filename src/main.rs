@@ -1,9 +1,17 @@
-use std::{fs::File, io::{self, BufRead}};
+use crate::models::Log;
+use anyhow::Error;
+use std::{
+    convert::TryFrom,
+    fs::File,
+    io::{self, BufRead},
+};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+mod models;
+
+fn main() -> Result<(), Error> {
     let file = File::open("input.log")?;
     for line in io::BufReader::new(file).lines() {
-        println!("{}", line?)
+        println!("{:?}", line.map_err(From::from).and_then(Log::try_from));
     }
 
     Ok(())
