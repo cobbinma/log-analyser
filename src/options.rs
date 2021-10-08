@@ -8,6 +8,10 @@ pub struct Opt {
     #[structopt(short, long, parse(from_os_str))]
     pub input_file: PathBuf,
 
+    /// Output file
+    #[structopt(short, long, parse(from_os_str))]
+    pub output_file: Option<PathBuf>,
+
     /// Error file
     #[structopt(short, long, parse(from_os_str))]
     pub error_file: Option<PathBuf>,

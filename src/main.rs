@@ -21,13 +21,22 @@ async fn main() -> Result<(), Error> {
     let statistics = analyse::messages(io::BufReader::new(file).lines())
             .await;
 
-    for e in statistics.errors {
-        eprintln!("{:#}", e);
-    }
+    print_errors(statistics.errors);
 
     print_type_statistics(statistics.types);
 
     Ok(())
+}
+
+fn print_errors(errors: Vec<anyhow::Error>) {
+    let mut table = Table::new();
+    table.set_header(vec!["Errors"]);
+
+    errors.iter().for_each(|e| {
+        table.add_row(vec![format!("{:#}", e)]);
+    });
+
+    println!("{}", table);
 }
 
 fn print_type_statistics(stats: HashMap<String, TypeStatistic>) {
