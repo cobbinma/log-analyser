@@ -1,15 +1,14 @@
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
-use std::convert::TryFrom;
+use std::{convert::TryFrom};
 
 #[derive(Debug, Clone)]
-pub struct TypeStat {
-    pub type_field: String,
+pub struct TypeStatistic {
     pub total_messages: u64,
     pub total_byte_size: u64,
 }
 
-impl TypeStat {
+impl TypeStatistic {
     pub fn add_message(&mut self, message: &Message) {
         self.total_messages += 1;
         self.total_byte_size += message.byte_size;
@@ -20,6 +19,15 @@ impl TypeStat {
 pub struct Message {
     pub type_field: String,
     pub byte_size: u64,
+}
+
+impl Message {
+    pub fn error() -> Self {
+        Message {
+            type_field: "errors".to_string(),
+            byte_size: 0,
+        }
+    }
 }
 
 impl TryFrom<String> for Message {
