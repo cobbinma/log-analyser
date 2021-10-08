@@ -1,6 +1,6 @@
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
-use std::{convert::TryFrom};
+use std::convert::TryFrom;
 
 #[derive(Debug, Clone)]
 pub struct TypeStatistic {
