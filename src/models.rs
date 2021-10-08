@@ -2,13 +2,27 @@ use anyhow::Error;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
-#[derive(Debug)]
-pub struct Log {
+#[derive(Debug, Clone)]
+pub struct TypeStat {
     pub type_field: String,
-    pub byte_size: usize,
+    pub total_messages: u64,
+    pub total_byte_size: u64,
 }
 
-impl TryFrom<String> for Log {
+impl TypeStat {
+    pub fn add_message(&mut self, message: &Message) {
+        self.total_messages += 1;
+        self.total_byte_size += message.byte_size;
+    }
+}
+
+#[derive(Debug)]
+pub struct Message {
+    pub type_field: String,
+    pub byte_size: u64,
+}
+
+impl TryFrom<String> for Message {
     type Error = anyhow::Error;
 
     fn try_from(value: String) -> Result<Self, Error> {
@@ -20,9 +34,9 @@ impl TryFrom<String> for Log {
         }
         let LogLine { type_field } = serde_json::from_str(&value).map_err(Error::from)?;
 
-        Ok(Log {
+        Ok(Message {
             type_field,
-            byte_size: value.as_bytes().len(),
+            byte_size: value.as_bytes().len() as u64,
         })
     }
 }
