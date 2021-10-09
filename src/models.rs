@@ -40,7 +40,7 @@ impl Statistics {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct TypeStatistic {
     pub total_messages: u64,
     pub total_byte_size: u64,
