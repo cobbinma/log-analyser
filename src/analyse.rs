@@ -2,19 +2,14 @@ use anyhow::Context;
 use std::convert::TryFrom;
 use tracing::error;
 
-use futures::{
-    stream::{self},
-    StreamExt,
-};
-
 use crate::models::{Message, Statistics};
 
-pub async fn lines<I>(lines: I) -> Statistics
+pub fn lines<I>(lines: I) -> Statistics
 where
-    I: IntoIterator<Item = Result<String, std::io::Error>>,
+    I: Iterator<Item = Result<String, std::io::Error>>,
 {
-    stream::iter(lines)
-        .then(|line| async {
+    lines
+        .map(|line| {
             let message = line
                 .context("unable to read line")
                 .map_err(From::from)
@@ -28,7 +23,7 @@ where
 
             message
         })
-        .fold(Statistics::new(), |mut stats, message| async move {
+        .fold(Statistics::new(), |mut stats, message| {
             match message {
                 Ok(m) => stats.add_message(m),
                 Err(e) => stats.add_error(e),
@@ -36,7 +31,6 @@ where
 
             stats
         })
-        .await
 }
 
 #[cfg(test)]
@@ -45,15 +39,17 @@ mod tests {
 
     use super::lines;
 
-    #[tokio::test]
-    async fn test_lines() {
-        let statistics = lines(vec![
-            Ok(r#"{"type":"B","foo":"bar","items":["one","two"]}"#.to_string()),
-            Ok(r#"{"type": "A","foo": 4.0 }"#.to_string()),
-            Ok(r#"{"type": "B","bar": "abcd"}"#.to_string()),
-            Ok(r#"{"type": "B","bar": "abcd"#.to_string()),
-        ])
-        .await;
+    #[test]
+    fn test_lines() {
+        let statistics = lines(
+            vec![
+                Ok(r#"{"type":"B","foo":"bar","items":["one","two"]}"#.to_string()),
+                Ok(r#"{"type": "A","foo": 4.0 }"#.to_string()),
+                Ok(r#"{"type": "B","bar": "abcd"}"#.to_string()),
+                Ok(r#"{"type": "B","bar": "abcd"#.to_string()),
+            ]
+            .into_iter(),
+        );
 
         let types = statistics.types();
 

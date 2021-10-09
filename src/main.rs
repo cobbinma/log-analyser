@@ -16,8 +16,7 @@ mod analyse;
 mod models;
 mod options;
 
-#[tokio::main]
-async fn main() -> Result<(), Error> {
+fn main() -> Result<(), Error> {
     let options = Opt::from_args();
 
     if options.debug {
@@ -30,7 +29,7 @@ async fn main() -> Result<(), Error> {
 
     let file = File::open(options.input_file).context("unable to open input file")?;
 
-    let statistics = analyse::lines(io::BufReader::new(file).lines()).await;
+    let statistics = analyse::lines(io::BufReader::new(file).lines());
 
     output_errors(options.error_file, statistics.errors()).context("unable to output errors")?;
 
