@@ -38,7 +38,10 @@ async fn main() -> Result<(), Error> {
     output_type_statistics(options.output_file, statistics.types())
         .context("unable to output statistics")?;
 
-    Ok(())
+    match statistics.errors().is_empty() {
+        true => Ok(()),
+        false => Err(anyhow::anyhow!("input file included errors"))
+    }
 }
 
 fn output_errors(errors_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Result<(), Error> {
