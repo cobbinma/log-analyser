@@ -53,7 +53,6 @@ impl TypeStatistic {
     }
 }
 
-#[derive(Debug)]
 pub struct Message {
     pub type_field: Type,
     pub byte_size: u64,
