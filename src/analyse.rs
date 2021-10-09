@@ -6,13 +6,13 @@ use futures::{
     StreamExt,
 };
 
-use crate::models::{Message, Statistics, TypeStatistic};
+use crate::models::{Message, Statistics};
 
-pub async fn messages<I>(messages: I) -> Statistics
+pub async fn lines<I>(lines: I) -> Statistics
 where
     I: IntoIterator<Item = Result<String, std::io::Error>>,
 {
-    stream::iter(messages)
+    stream::iter(lines)
         .then(|line| async {
             line.context("unable to read line")
                 .map_err(From::from)
@@ -21,15 +21,8 @@ where
         })
         .fold(Statistics::new(), |mut stats, message| async move {
             match message {
-                Ok(message) => stats
-                    .types
-                    .entry(message.type_field.clone())
-                    .or_insert(TypeStatistic {
-                        total_messages: 0,
-                        total_byte_size: 0,
-                    })
-                    .add_message(&message),
-                Err(e) => stats.errors.push(e),
+                Ok(m) => stats.add_message(m),
+                Err(e) => stats.add_error(e),
             }
 
             stats
@@ -39,18 +32,37 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::messages;
+    use crate::models::TypeStatistic;
+
+    use super::lines;
 
     #[tokio::test]
-    async fn my_test() {
-        let statistics = messages(vec![
+    async fn test_lines() {
+        let statistics = lines(vec![
             Ok(r#"{"type":"B","foo":"bar","items":["one","two"]}"#.to_string()),
             Ok(r#"{"type": "A","foo": 4.0 }"#.to_string()),
             Ok(r#"{"type": "B","bar": "abcd"}"#.to_string()),
+            Ok(r#"{"type": "B","bar": "abcd"#.to_string()),
         ])
         .await;
 
-        assert_eq!(statistics.types.len(), 2);
-        assert_eq!(statistics.errors.len(), 0);
+        let types = statistics.types();
+
+        assert_eq!(
+            types.get("A"),
+            Some(&TypeStatistic {
+                total_messages: 1,
+                total_byte_size: 25
+            })
+        );
+        assert_eq!(
+            types.get("B"),
+            Some(&TypeStatistic {
+                total_messages: 2,
+                total_byte_size: 73
+            })
+        );
+        assert_eq!(types.get("C"), None);
+        assert_eq!(statistics.errors().len(), 1);
     }
 }

@@ -9,10 +9,10 @@ pub struct Opt {
     pub input_file: PathBuf,
 
     /// Output file
-    #[structopt(short, long, parse(from_os_str))]
+    #[structopt(short, long)]
     pub output_file: Option<PathBuf>,
 
     /// Error file
-    #[structopt(short, long, parse(from_os_str))]
+    #[structopt(short, long)]
     pub error_file: Option<PathBuf>,
 }

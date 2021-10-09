@@ -5,7 +5,8 @@ use options::Opt;
 use std::{
     collections::HashMap,
     fs::File,
-    io::{self, BufRead},
+    io::{self, BufRead, Write},
+    path::PathBuf,
 };
 use structopt::StructOpt;
 
@@ -18,17 +19,17 @@ async fn main() -> Result<(), Error> {
     let options = Opt::from_args();
     let file = File::open(options.input_file).context("unable to open input file")?;
 
-    let statistics = analyse::messages(io::BufReader::new(file).lines())
-            .await;
+    let statistics = analyse::lines(io::BufReader::new(file).lines()).await;
 
-    print_errors(statistics.errors);
+    output_errors(options.error_file, statistics.errors()).context("unable to output errors")?;
 
-    print_type_statistics(statistics.types);
+    output_type_statistics(options.output_file, statistics.types())
+        .context("unable to output statistics")?;
 
     Ok(())
 }
 
-fn print_errors(errors: Vec<anyhow::Error>) {
+fn output_errors(output_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Result<(), Error> {
     let mut table = Table::new();
     table.set_header(vec!["Errors"]);
 
@@ -36,10 +37,22 @@ fn print_errors(errors: Vec<anyhow::Error>) {
         table.add_row(vec![format!("{:#}", e)]);
     });
 
-    println!("{}", table);
+    match output_file {
+        Some(file) => {
+            let mut file = File::create(file).context("unable to create file")?;
+            file.write_all(table.to_string().as_bytes())
+                .context("unable to write file")?;
+        }
+        None => eprintln!("{}", table),
+    };
+
+    Ok(())
 }
 
-fn print_type_statistics(stats: HashMap<String, TypeStatistic>) {
+fn output_type_statistics(
+    output_file: Option<PathBuf>,
+    stats: &HashMap<String, TypeStatistic>,
+) -> Result<(), Error> {
     let mut table = Table::new();
     table.set_header(vec!["Type", "Total Messages", "Total Byte Size"]);
 
@@ -51,5 +64,14 @@ fn print_type_statistics(stats: HashMap<String, TypeStatistic>) {
         ]);
     });
 
-    println!("{}", table);
+    match output_file {
+        Some(file) => {
+            let mut file = File::create(file).context("unable to create file")?;
+            file.write_all(table.to_string().as_bytes())
+                .context("unable to write file")?;
+        }
+        None => println!("{}", table),
+    };
+
+    Ok(())
 }

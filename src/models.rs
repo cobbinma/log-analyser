@@ -5,8 +5,8 @@ use std::{collections::HashMap, convert::TryFrom};
 type Type = String;
 
 pub struct Statistics {
-    pub types: HashMap<Type, TypeStatistic>,
-    pub errors: Vec<Error>,
+    types: HashMap<Type, TypeStatistic>,
+    errors: Vec<Error>,
 }
 
 impl Statistics {
@@ -16,16 +16,38 @@ impl Statistics {
             errors: vec![],
         }
     }
+
+    pub fn add_message(&mut self, message: Message) {
+        self.types
+            .entry(message.type_field.clone())
+            .or_insert(TypeStatistic {
+                total_messages: 0,
+                total_byte_size: 0,
+            })
+            .add_message(&message)
+    }
+
+    pub fn add_error(&mut self, error: Error) {
+        self.errors.push(error)
+    }
+
+    pub fn types(&self) -> &HashMap<Type, TypeStatistic> {
+        &self.types
+    }
+
+    pub fn errors(&self) -> &Vec<Error> {
+        &self.errors
+    }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TypeStatistic {
     pub total_messages: u64,
     pub total_byte_size: u64,
 }
 
 impl TypeStatistic {
-    pub fn add_message(&mut self, message: &Message) {
+    fn add_message(&mut self, message: &Message) {
         self.total_messages += 1;
         self.total_byte_size += message.byte_size;
     }
