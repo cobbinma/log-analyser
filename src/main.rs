@@ -8,8 +8,9 @@ use std::{
     io::{self, BufRead, Write},
     path::PathBuf,
 };
-use tracing::{info, debug};
 use structopt::StructOpt;
+use tracing::{debug, info};
+use tracing_subscriber::EnvFilter;
 
 mod analyse;
 mod models;
@@ -18,7 +19,13 @@ mod options;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let options = Opt::from_args();
-    tracing_subscriber::fmt().pretty().init();
+
+    if options.debug {
+        tracing_subscriber::fmt()
+            .with_env_filter(EnvFilter::new("debug"))
+            .pretty()
+            .init();
+    };
 
     info!(message = "starting log-analyser", ?options);
 
@@ -54,7 +61,7 @@ fn output_errors(errors_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Resu
             None => {
                 debug!("outputting errors to stderr");
                 eprintln!("{}", table);
-            },
+            }
         };
     };
 
@@ -87,7 +94,7 @@ fn output_type_statistics(
         None => {
             debug!("outputting statistics to stdout");
             println!("{}", table);
-        },
+        }
     };
 
     Ok(())

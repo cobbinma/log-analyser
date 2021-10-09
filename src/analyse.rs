@@ -1,6 +1,6 @@
 use anyhow::Context;
-use tracing::error;
 use std::convert::TryFrom;
+use tracing::error;
 
 use futures::{
     stream::{self},
@@ -15,7 +15,8 @@ where
 {
     stream::iter(lines)
         .then(|line| async {
-            let message = line.context("unable to read line")
+            let message = line
+                .context("unable to read line")
                 .map_err(From::from)
                 .and_then(Message::try_from)
                 .context("unable to parse line");

@@ -4,6 +4,10 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(name = "log-analyser")]
 pub struct Opt {
+    /// Debug mode
+    #[structopt(short, long)]
+    pub debug: bool,
+
     /// Input file
     #[structopt(short, long, parse(from_os_str))]
     pub input_file: PathBuf,
