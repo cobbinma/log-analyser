@@ -55,7 +55,7 @@ impl TypeStatistic {
 
 #[derive(Debug)]
 pub struct Message {
-    pub type_field: String,
+    pub type_field: Type,
     pub byte_size: u64,
 }
 
@@ -67,7 +67,7 @@ impl TryFrom<String> for Message {
         #[serde(rename_all = "camelCase")]
         struct LogLine {
             #[serde(rename = "type")]
-            pub type_field: String,
+            pub type_field: Type,
         }
         let LogLine { type_field } = serde_json::from_str(&value).map_err(Error::from)?;
 
