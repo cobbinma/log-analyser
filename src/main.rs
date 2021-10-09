@@ -23,7 +23,6 @@ async fn main() -> Result<(), Error> {
     if options.debug {
         tracing_subscriber::fmt()
             .with_env_filter(EnvFilter::new("debug"))
-            .pretty()
             .init();
     };
 
