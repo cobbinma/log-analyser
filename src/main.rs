@@ -29,21 +29,23 @@ async fn main() -> Result<(), Error> {
     Ok(())
 }
 
-fn output_errors(output_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Result<(), Error> {
-    let mut table = Table::new();
-    table.set_header(vec!["Errors"]);
+fn output_errors(errors_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Result<(), Error> {
+    if !errors.is_empty() {
+        let mut table = Table::new();
+        table.set_header(vec!["Errors"]);
 
-    errors.iter().for_each(|e| {
-        table.add_row(vec![format!("{:#}", e)]);
-    });
+        errors.iter().for_each(|e| {
+            table.add_row(vec![format!("{:#}", e)]);
+        });
 
-    match output_file {
-        Some(file) => {
-            let mut file = File::create(file).context("unable to create file")?;
-            file.write_all(table.to_string().as_bytes())
-                .context("unable to write file")?;
-        }
-        None => eprintln!("{}", table),
+        match errors_file {
+            Some(file) => {
+                let mut file = File::create(file).context("unable to create file")?;
+                file.write_all(table.to_string().as_bytes())
+                    .context("unable to write file")?;
+            }
+            None => eprintln!("{}", table),
+        };
     };
 
     Ok(())
