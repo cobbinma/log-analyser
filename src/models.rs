@@ -63,7 +63,7 @@ impl TryFrom<String> for Message {
     type Error = anyhow::Error;
 
     fn try_from(value: String) -> Result<Self, Error> {
-        #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+        #[derive(Serialize, Deserialize)]
         #[serde(rename_all = "camelCase")]
         struct LogLine {
             #[serde(rename = "type")]
