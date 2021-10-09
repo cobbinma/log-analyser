@@ -1,4 +1,5 @@
 use anyhow::Context;
+use tracing::error;
 use std::convert::TryFrom;
 
 use futures::{
@@ -14,10 +15,17 @@ where
 {
     stream::iter(lines)
         .then(|line| async {
-            line.context("unable to read line")
+            let message = line.context("unable to read line")
                 .map_err(From::from)
                 .and_then(Message::try_from)
-                .context("unable to parse line")
+                .context("unable to parse line");
+
+            if let Err(error) = &message {
+                let error_message = format!("{:#}", error);
+                error!(message = "error analysing line", %error_message);
+            };
+
+            message
         })
         .fold(Statistics::new(), |mut stats, message| async move {
             match message {

@@ -8,6 +8,7 @@ use std::{
     io::{self, BufRead, Write},
     path::PathBuf,
 };
+use tracing::{info, debug};
 use structopt::StructOpt;
 
 mod analyse;
@@ -17,6 +18,10 @@ mod options;
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let options = Opt::from_args();
+    tracing_subscriber::fmt().pretty().init();
+
+    info!(message = "starting log-analyser", ?options);
+
     let file = File::open(options.input_file).context("unable to open input file")?;
 
     let statistics = analyse::lines(io::BufReader::new(file).lines()).await;
@@ -30,6 +35,7 @@ async fn main() -> Result<(), Error> {
 }
 
 fn output_errors(errors_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Result<(), Error> {
+    debug!("outputting errors : found {} error(s)", errors.len());
     if !errors.is_empty() {
         let mut table = Table::new();
         table.set_header(vec!["Errors"]);
@@ -40,11 +46,15 @@ fn output_errors(errors_file: Option<PathBuf>, errors: &[anyhow::Error]) -> Resu
 
         match errors_file {
             Some(file) => {
+                debug!(message = "outputting errors to file", ?file);
                 let mut file = File::create(file).context("unable to create file")?;
                 file.write_all(table.to_string().as_bytes())
                     .context("unable to write file")?;
             }
-            None => eprintln!("{}", table),
+            None => {
+                debug!("outputting errors to stderr");
+                eprintln!("{}", table);
+            },
         };
     };
 
@@ -55,6 +65,7 @@ fn output_type_statistics(
     output_file: Option<PathBuf>,
     stats: &HashMap<String, TypeStatistic>,
 ) -> Result<(), Error> {
+    debug!("outputting statistics : found {} type(s)", stats.len());
     let mut table = Table::new();
     table.set_header(vec!["Type", "Total Messages", "Total Byte Size"]);
 
@@ -68,11 +79,15 @@ fn output_type_statistics(
 
     match output_file {
         Some(file) => {
+            debug!(message = "outputting statistics to file", ?file);
             let mut file = File::create(file).context("unable to create file")?;
             file.write_all(table.to_string().as_bytes())
                 .context("unable to write file")?;
         }
-        None => println!("{}", table),
+        None => {
+            debug!("outputting statistics to stdout");
+            println!("{}", table);
+        },
     };
 
     Ok(())
