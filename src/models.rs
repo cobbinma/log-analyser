@@ -72,7 +72,7 @@ impl TryFrom<String> for Message {
 
         Ok(Message {
             type_field,
-            byte_size: value.as_bytes().len() as u64,
+            byte_size: value.len() as u64,
         })
     }
 }
