@@ -38,7 +38,10 @@ fn main() -> Result<(), Error> {
 
     match statistics.errors().is_empty() {
         true => Ok(()),
-        false => Err(anyhow::anyhow!("input file included errors")),
+        false => Err(anyhow::anyhow!(format!(
+            "input file included {} error(s)",
+            statistics.errors().len()
+        ))),
     }
 }
 
