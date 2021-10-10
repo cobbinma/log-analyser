@@ -1,6 +1,6 @@
 use anyhow::{Context, Error};
 use comfy_table::Table;
-use models::TypeStatistic;
+use message::TypeStatistic;
 use options::Opt;
 use std::{
     collections::HashMap,
@@ -13,7 +13,7 @@ use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 
 mod analyse;
-mod models;
+mod message;
 mod options;
 
 fn main() -> Result<(), Error> {

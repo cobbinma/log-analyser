@@ -2,7 +2,7 @@ use anyhow::Context;
 use std::convert::TryFrom;
 use tracing::error;
 
-use crate::models::{Message, MessageStatistics};
+use crate::message::{Message, MessageStatistics};
 
 pub fn lines<I>(lines: I) -> MessageStatistics
 where
@@ -35,7 +35,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::models::TypeStatistic;
+    use crate::message::TypeStatistic;
 
     use super::lines;
 
