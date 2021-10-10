@@ -2,9 +2,9 @@ use anyhow::Context;
 use std::convert::TryFrom;
 use tracing::error;
 
-use crate::models::{Message, Statistics};
+use crate::models::{Message, MessageStatistics};
 
-pub fn lines<I>(lines: I) -> Statistics
+pub fn lines<I>(lines: I) -> MessageStatistics
 where
     I: Iterator<Item = Result<String, std::io::Error>>,
 {
@@ -23,7 +23,7 @@ where
 
             message
         })
-        .fold(Statistics::new(), |mut stats, message| {
+        .fold(MessageStatistics::new(), |mut stats, message| {
             match message {
                 Ok(m) => stats.add_message(m),
                 Err(e) => stats.add_error(e),

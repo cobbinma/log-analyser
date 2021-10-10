@@ -2,14 +2,14 @@ use anyhow::Error;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, convert::TryFrom};
 
-type Type = String;
+type MessageType = String;
 
-pub struct Statistics {
-    types: HashMap<Type, TypeStatistic>,
+pub struct MessageStatistics {
+    types: HashMap<MessageType, TypeStatistic>,
     errors: Vec<Error>,
 }
 
-impl Statistics {
+impl MessageStatistics {
     pub fn new() -> Self {
         Self {
             types: HashMap::new(),
@@ -31,7 +31,7 @@ impl Statistics {
         self.errors.push(error)
     }
 
-    pub fn types(&self) -> &HashMap<Type, TypeStatistic> {
+    pub fn types(&self) -> &HashMap<MessageType, TypeStatistic> {
         &self.types
     }
 
@@ -54,7 +54,7 @@ impl TypeStatistic {
 }
 
 pub struct Message {
-    pub type_field: Type,
+    pub type_field: MessageType,
     pub byte_size: u64,
 }
 
@@ -66,7 +66,7 @@ impl TryFrom<String> for Message {
         #[serde(rename_all = "camelCase")]
         struct LogLine {
             #[serde(rename = "type")]
-            pub type_field: Type,
+            pub type_field: MessageType,
         }
         let LogLine { type_field } = serde_json::from_str(&value).map_err(Error::from)?;
 
